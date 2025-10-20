@@ -1,46 +1,128 @@
 #include <iostream>
+#include <string>
+#include <sstream>  //文字列が数字か判定
+
 
 class Node {
 public:
-    virtual int returnValue() = 0;  // 純粋仮想関数に変更
-    virtual ~Node() {}               // 安全な削除のため仮想デストラクタ
+    virtual ~Node() {}  //仮想デストラクタ
+
+    virtual int getValue(){
+        return 0;
+    }
+
+    virtual void setLeft(Node* left_){}
+    virtual void setRight(Node* right_){}
+    virtual void setOp(char op_){}
+
 };
 
 
 class Integer : public Node {
 public:
     int value;
+
     Integer(int value_) : value(value_) {}
-    int returnValue() override { return value; }
+
+    int getValue() override {
+        return value;
+    }
 };
 
 
 class BinaryExpression : public Node {
 public:
-    char op;
     Node* left;
     Node* right;
+    char op;
 
-    BinaryExpression(char op_, Node* left_, Node* right_)
-        : op(op_), left(left_), right(right_) {}
+    BinaryExpression(Node* left_, Node* right_, char op_) : left(left_), right(right_), op(op_) {}
 
-    int returnValue() override {
-        if(op == '+') return left->returnValue() + right->returnValue();
-        if(op == '-') return left->returnValue() - right->returnValue();
-        if(op == '*') return left->returnValue() * right->returnValue();
+    int getValue() override {
+        if (op == '+')  return left->getValue() + right->getValue();
+        else if (op == '-') return left->getValue() - right->getValue();
+        else if (op == '*') return left->getValue() * right->getValue();
         return 0;
     }
+
+    void setLeft(Node* left_) override{
+        left = left_;
+    }
+
+    void setRight(Node* right_) override{
+        right = right_;
+    }
+
+    void setOp(char op_) override{
+        op = op_;
+    }
+
 };
 
 
-int main() {
-    Integer int1(10);
-    Integer int2(20);
-    BinaryExpression expr1('+', &int1, &int2);
-    BinaryExpression expr2('*', &expr1, &int2);
+Node* parseInteger(const std::string tokensa[], int& indexa, int sizea){
 
-    std::cout << expr1.returnValue() << std::endl; // 30
-    std::cout << expr2.returnValue() << std::endl; // 600
+    std::cout << "Parsing Integer: " << tokensa[indexa] << std::endl;
+    Node* node1 = new Integer(std::stoi(tokensa[indexa]));
+    indexa++;
+    return node1;
+}
+
+
+Node* parserMul(const std::string tokensa[], int& indexa, int sizea){
+
+    std::cout << "Parsing Mul: " << std::endl;
+    Node* node1 = parseInteger(tokensa, indexa, sizea);
+
+    while( indexa < sizea && tokensa[indexa][0] == '*' ) {
+        node1 = new BinaryExpression(node1, nullptr, tokensa[indexa][0]);
+        indexa++;
+        node1->setRight(parseInteger(tokensa, indexa, sizea));
+    }
+
+    return node1;
+
+}
+
+
+Node* parserAddSub(const std::string tokensa[], int& indexa, int sizea){
+
+    std::cout << "Parsing AddSub: " << std::endl;
+    Node* node1 = parserMul(tokensa, indexa, sizea);
+
+    while( indexa < sizea && (tokensa[indexa][0] == '+' || tokensa[indexa][0] == '-') ) {
+        node1 = new BinaryExpression(node1, nullptr, tokensa[indexa][0]);
+        indexa++;
+        node1->setRight(parserMul(tokensa, indexa, sizea));
+    }
+
+    return node1;
+
+}
+
+
+
+
+
+
+
+
+bool isInteger(const std::string& s){
+    std::istringstream iss(s);
+    int x;
+    char c;
+    return (iss >> x) && !(iss >> c);
+}
+
+
+int main() {
+
+    std::string tokens[5] = {"12", "+", "3", "*", "2"};
+    int index1 = 0;
+
+    Node* node1 = parserAddSub(tokens, index1, 5);
+
+    std::cout << node1->getValue() << std::endl;
 
     return 0;
 }
