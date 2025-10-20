@@ -62,7 +62,6 @@ public:
 
 Node* parseInteger(const std::string tokensa[], int& indexa, int sizea){
 
-    std::cout << "Parsing Integer: " << tokensa[indexa] << std::endl;
     Node* node1 = new Integer(std::stoi(tokensa[indexa]));
     indexa++;
     return node1;
@@ -71,7 +70,6 @@ Node* parseInteger(const std::string tokensa[], int& indexa, int sizea){
 
 Node* parserMul(const std::string tokensa[], int& indexa, int sizea){
 
-    std::cout << "Parsing Mul: " << std::endl;
     Node* node1 = parseInteger(tokensa, indexa, sizea);
 
     while( indexa < sizea && tokensa[indexa][0] == '*' ) {
@@ -87,7 +85,6 @@ Node* parserMul(const std::string tokensa[], int& indexa, int sizea){
 
 Node* parserAddSub(const std::string tokensa[], int& indexa, int sizea){
 
-    std::cout << "Parsing AddSub: " << std::endl;
     Node* node1 = parserMul(tokensa, indexa, sizea);
 
     while( indexa < sizea && (tokensa[indexa][0] == '+' || tokensa[indexa][0] == '-') ) {
@@ -117,10 +114,10 @@ bool isInteger(const std::string& s){
 
 int main() {
 
-    std::string tokens[5] = {"12", "+", "3", "*", "2"};
+    std::string tokens[7] = {"2", "*", "3", "+", "5", "*", "5"};
     int index1 = 0;
 
-    Node* node1 = parserAddSub(tokens, index1, 5);
+    Node* node1 = parserAddSub(tokens, index1, 7);
 
     std::cout << node1->getValue() << std::endl;
 
